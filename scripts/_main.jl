@@ -315,7 +315,7 @@ CSV.write(joinpath(filepath,"load_data_scenarios.csv"), load_genx);
 # Renewables -----------------------------------------------------------
 # RENEWABLES NEED TO BE IMPROVED/CORRECTED. 
 
-# renewable_df = zeros(scenario_length, 2 * number_of_scenarios);
+renewable_df = zeros(scenario_length, 2 * number_of_scenarios);
 # renewable_df[:, solar_index] = transpose(copy(solar_scen));
 # renewable_df[:, wind_index] = transpose(copy(wind_scen));
 
@@ -332,3 +332,14 @@ CSV.write(joinpath(filepath,"load_data_scenarios.csv"), load_genx);
 # rename!(renewable_genx, renewable_header);
 # CSV.write("generators_variability_scenarios.csv", renewable_genx)
 
+### Generate single dataframe with concatenated scenarios of Solar, Wind, and Load, in that order
+master_scen_mat = zeros(scenario_length, 3 * number_of_scenarios)
+master_scen_df = DataFrame()
+
+# loop over the number of scenarios and concatenate scenario to the master scenario datafarme
+for scen_id in range(1,number_of_scenarios)
+    id_solar = copy(solar_scen[scen_id,:]) # using transpose does not work
+    id_wind = copy(wind_scen[scen_id,:])
+    id_load = copy(load_scen[scen_id,:])
+    insertcols!(master_scen_df, :S => id_solar, :W => id_wind, :L => id_load, makeunique=true )
+end

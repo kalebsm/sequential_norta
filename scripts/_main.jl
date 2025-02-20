@@ -62,6 +62,10 @@ function datadir(x::String)
     return(joinpath(pwd(), "data", x))
 end
 
+function plotsdir(x::String)
+    return(joinpath(pwd(), "plots", x))
+end
+
 
 #=======================================================================
 READ INPUT FILE
@@ -258,6 +262,14 @@ CONVERT PROBABILITY SCENARIOS INTO DATA SCENARIOS
 load_scen = convert_land_prob_to_data_w(load_data, load_prob_scen, scenario_year, scenario_month, scenario_day, scenario_hour);
 solar_scen = convert_land_prob_to_data_w(solar_data, solar_prob_scen, scenario_year, scenario_month, scenario_day, scenario_hour);
 wind_scen = convert_land_prob_to_data_w(wind_data, wind_prob_scen, scenario_year, scenario_month, scenario_day, scenario_hour);
+
+#=======================================================================
+WRITE SCENARIOS TO FILE
+=======================================================================#
+
+write_scenarios(load_scen, "load")
+write_scenarios(solar_scen, "solar")
+write_scenarios(wind_scen, "wind")
 
 #=======================================================================
 PLOT HISTORICAL LANDING

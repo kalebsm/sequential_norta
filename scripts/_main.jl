@@ -7,8 +7,8 @@
 #=======================================================================
 PROJECT SETUP
 =======================================================================#
-using DrWatson
-@quickactivate("norta_scenarios")
+using Pkg
+Pkg.activate("norta_scenarios")
 
 # Import all required packages. 
 begin
@@ -18,10 +18,11 @@ begin
     using DelimitedFiles
     using Distributions
     using HDF5
-    using LaTeXStrings
+    # using LaTeXStrings
     using LinearAlgebra
     using LinearSolve
     using Random
+    using RCall
     using Statistics
     using StatsBase
     using Plots
@@ -31,23 +32,36 @@ begin
 end
 
 # Include functions 
-include(projectdir("src", "fct_bind_historical_forecast.jl"));
-include(projectdir("src", "fct_compute_hourly_average_actuals.jl"));
-include(projectdir("src", "fct_compute_landing_probability.jl"));
-include(projectdir("src", "fct_convert_hours_2018.jl"));
-include(projectdir("src", "fct_convert_ISO_standard.jl"));
-include(projectdir("src", "fct_convert_land_prob_to_data.jl"));
-include(projectdir("src", "fct_generate_probability_scenarios.jl"));
-#include(projectdir("src", "fct_getplots.jl"));
-#include(projectdir("src", "fct_plot_correlation_heatmap.jl"));
-include(projectdir("src", "fct_plot_historical_landing.jl"));
-include(projectdir("src", "fct_plot_historical_synthetic_autocorrelation.jl"));
-include(projectdir("src", "fct_plot_correlogram_landing_probability.jl"));
-include(projectdir("src", "fct_plot_scenarios_and_actual.jl"));
-include(projectdir("src", "fct_read_h5_file.jl"));
-include(projectdir("src", "fct_read_input_file.jl"));
-include(projectdir("src", "fct_transform_landing_probability.jl"));
-include(projectdir("src", "fct_write_percentiles.jl"));
+include(joinpath(pwd(), "src", "fct_bind_historical_forecast.jl"));
+include(joinpath(pwd(), "src", "fct_compute_hourly_average_actuals.jl"));
+include(joinpath(pwd(), "src", "fct_compute_landing_probability.jl"));
+include(joinpath(pwd(), "src", "fct_convert_hours_2018.jl"));
+include(joinpath(pwd(), "src", "fct_convert_ISO_standard.jl"));
+include(joinpath(pwd(), "src", "fct_convert_land_prob_to_data.jl"));
+include(joinpath(pwd(), "src", "fct_generate_probability_scenarios.jl"));
+include(joinpath(pwd(), "src", "fct_getplots.jl"));
+# include(joinpath(pwd(), "src", "fct_plot_correlation_heatmap.jl"));
+include(joinpath(pwd(), "src", "fct_plot_historical_landing.jl"));
+include(joinpath(pwd(), "src", "fct_plot_historical_synthetic_autocorrelation.jl"));
+include(joinpath(pwd(), "src", "fct_plot_correlogram_landing_probability.jl"));
+include(joinpath(pwd(), "src", "fct_plot_scenarios_and_actual.jl"));
+include(joinpath(pwd(), "src", "fct_read_h5_file.jl"));
+include(joinpath(pwd(), "src", "fct_read_input_file.jl"));
+include(joinpath(pwd(), "src", "fct_transform_landing_probability.jl"));
+include(joinpath(pwd(), "src", "fct_write_percentiles.jl"));
+
+#=======================================================================
+AUXILIARY FUNCTIONS
+=======================================================================#
+
+function projectdir(x::String)
+    return(joinpath(pwd(), x))
+end
+
+function datadir(x::String)
+    return(joinpath(pwd(), "data", x))
+end
+
 
 #=======================================================================
 READ INPUT FILE
@@ -79,18 +93,18 @@ READ INPUT DATA: ARPA-E PERFORM PROJECT H5 FILES
 # cast values into a single dataframe.
 
 # Load data
-load_actuals = read_h5_file(datadir("exp_raw", historical_load), "load");
-load_forecast = read_h5_file(datadir("exp_raw", "ercot_BA_load_forecast_day_ahead_2018.h5"), "load", false);
+load_actuals = read_h5_file(datadir("ercot_BA_load_actuals_2018.h5"), "load");
+load_forecast = read_h5_file(datadir("ercot_BA_load_forecast_day_ahead_2018.h5"), "load", false);
 
 # Solar data
-solar_actuals = read_h5_file(datadir("exp_raw", "ercot_BA_solar_actuals_Existing_2018.h5"), "solar");
-solar_forecast_dayahead = read_h5_file(datadir("exp_raw", "ercot_BA_solar_forecast_day_ahead_existing_2018.h5"), "solar", false);
-solar_forecast_2dayahead = read_h5_file(datadir("exp_raw", "ercot_BA_solar_forecast_2_day_ahead_existing_2018.h5"), "solar", false);
+solar_actuals = read_h5_file(datadir("ercot_BA_solar_actuals_Existing_2018.h5"), "solar");
+solar_forecast_dayahead = read_h5_file(datadir("ercot_BA_solar_forecast_day_ahead_existing_2018.h5"), "solar", false);
+solar_forecast_2dayahead = read_h5_file(datadir("ercot_BA_solar_forecast_2_day_ahead_existing_2018.h5"), "solar", false);
 
 # Wind data
-wind_actuals = read_h5_file(datadir("exp_raw","ercot_BA_wind_actuals_Existing_2018.h5"), "wind");
-wind_forecast_dayahead = read_h5_file(datadir("exp_raw", "ercot_BA_wind_forecast_day_ahead_existing_2018.h5"), "wind", false);
-wind_forecast_2dayahead = read_h5_file(datadir("exp_raw", "ercot_BA_wind_forecast_2_day_ahead_existing_2018.h5"), "wind", false);
+wind_actuals = read_h5_file(datadir("ercot_BA_wind_actuals_Existing_2018.h5"), "wind");
+wind_forecast_dayahead = read_h5_file(datadir("ercot_BA_wind_forecast_day_ahead_existing_2018.h5"), "wind", false);
+wind_forecast_2dayahead = read_h5_file(datadir("ercot_BA_wind_forecast_2_day_ahead_existing_2018.h5"), "wind", false);
 
 #=======================================================================
 Compute the hourly average for the actuals data

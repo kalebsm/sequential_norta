@@ -23,6 +23,13 @@ function compute_landing_probability(data)
         quantiles = collect(data[i, percentile_column_index]);
         empirical_cdf = ecdf(quantiles);
         landing_probability[i] = empirical_cdf(data[i, :avg_actual]);
+        
+        if landing_probability[i]  == 1
+            landing_probability[i]  = 0.99
+        elseif landing_probability[i]  == 0
+            landing_probability[i]  = 0.01
+        end
+
         # -----
         #= Storing min and max of adjust empirical_cdf function
         mm[i,3] = empirical_cdf(0); #Min. value emp. CDF can compute

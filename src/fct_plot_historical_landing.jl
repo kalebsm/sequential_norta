@@ -55,8 +55,7 @@ function plot_historical_landing(data, type, dayahead = true)
     scatter!(
         df.forecast_time,
         df[:,3],
-        mc=:gray,
-        alpha = 0.3,
+        mc=:whitesmoke,
         markersize=0.8,
         markerstrokewidth=0,
         label = "Forecasts")
@@ -65,8 +64,7 @@ function plot_historical_landing(data, type, dayahead = true)
         scatter!(
             df.forecast_time,
             df[:, i],
-            mc=:gray,
-            alpha = 0.3,
+            mc=:whitesmoke,
             markersize=0.8,
             markerstrokewidth=0,
             label = "")
@@ -94,6 +92,5 @@ function plot_historical_landing(data, type, dayahead = true)
     else
         name = lowercase(type)*"_"*"2day-ahead"*"_historical_landing.png"
     end
-    filepath = mkpath(plotsdir("historical_landing"))
-    png(joinpath(filepath,name))
+    savefig(here("plots",name))
 end

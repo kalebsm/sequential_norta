@@ -14,7 +14,7 @@
         - plot (.png) with synthetic and historical autocorrelation
     """
     # Number of scenarios 
-    nscen, _ = size(scenarios); 
+    nscen, aux = size(scenarios); 
 
     # Obtain the historical data
     scenario_timestamp_begin = DateTime(scenario_year, scenario_month, scenario_day, scenario_hour);
@@ -73,7 +73,6 @@
     title!(type *" ACF")
 
     # Save fig
-    filepath = mkpath(plotsdir("autocorrelation_analysis"))
-    filename = type*"_acf.png"
-    png(joinpath(filepath, filename));
+    filename = joinpath(pwd(),"output","figs", type*"_acf.png");
+    png(filename);
 end

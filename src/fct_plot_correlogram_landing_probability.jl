@@ -43,7 +43,6 @@ function plot_correlogram_landing_probability(data, type)
     )
 
     # Save fig
-    filepath = mkpath(plotsdir("correlograms"))
-    filename = type*"_correlogram.png";
-    png(joinpath(filepath, filename))
+    filename = joinpath(pwd(),"output","figs", type*"_correlogram.png");
+    png(filename)
 end

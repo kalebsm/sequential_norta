@@ -18,50 +18,63 @@ function convert_hours_2018(data, is_actual = true)
     # and break it in groups. Since forecasts have forecast time and 
     # issue time, forecasts have been classified into two groups. 
     # The issue time takes the forecast "y" after the group number.
+    # if is_actual
+    #     x = copy(data[:, :time_index])
+    #     group_1 = x .<= DateTime(2018, 03, 11, 2) #from Jan. till Mar. 11
+    #     group_2 = DateTime(2018, 03, 11, 2) .< x .<= DateTime(2018, 03, 25, 1) #from Mar. 11 to Mar. 25
+    #     group_3 = DateTime(2018, 03, 25, 1) .< x .<= DateTime(2018, 10, 28, 2) #from Mar. 25 to Oct. 28
+    #     group_4 = DateTime(2018, 10, 28, 2) .< x .<= DateTime(2018, 11, 04, 2) #from Oct. 28 to Nov. 04
+    #     group_5 = x .>= DateTime(2018, 11, 04, 2) #from Nov. 04 ahead
+    # else
+    #     x = copy(data[:, :forecast_time])
+    #     group_1 = x .<= DateTime(2018, 03, 11, 2) #from Jan. till Mar. 11
+    #     group_2 = DateTime(2018, 03, 11, 2) .< x .<= DateTime(2018, 03, 25, 1) #from Mar. 11 to Mar. 25
+    #     group_3 = DateTime(2018, 03, 25, 1) .< x .<= DateTime(2018, 10, 28, 2) #from Mar. 25 to Oct. 28
+    #     group_4 = DateTime(2018, 10, 28, 2) .< x .<= DateTime(2018, 11, 04, 2) #from Oct. 28 to Nov. 04
+    #     group_5 = x .>= DateTime(2018, 11, 04, 2) #from Nov. 04 ahead
+
+    #     y = copy(data[:, :issue_time])
+    #     group_1y = y .<= DateTime(2018, 03, 11, 2) #from Jan. till Mar. 11
+    #     group_2y = DateTime(2018, 03, 11, 2) .< y .<= DateTime(2018, 03, 25, 1) #from Mar. 11 to Mar. 25
+    #     group_3y = DateTime(2018, 03, 25, 1) .< y .<= DateTime(2018, 10, 28, 2) #from Mar. 25 to Oct. 28
+    #     group_4y = DateTime(2018, 10, 28, 2) .< y .<= DateTime(2018, 11, 04, 2) #from Oct. 28 to Nov. 04
+    #     group_5y = y .>= DateTime(2018, 11, 04, 2) #from Nov. 04 ahead
+    # end
+
+    # # Groups are set up. Carry out transformations
+    # if is_actual
+    #     df = copy(data)
+    #     df[group_1, :time_index] = df[group_1, :time_index] - Hour(6)
+    #     df[group_2, :time_index] = df[group_2, :time_index] - Hour(5)
+    #     df[group_3, :time_index] = df[group_3, :time_index] - Hour(6)
+    #     df[group_4, :time_index] = df[group_4, :time_index] - Hour(5)
+    #     df[group_5, :time_index] = df[group_5, :time_index] - Hour(6)
+    # else
+    #     df = copy(data)
+    #     # Forecast
+    #     df[group_1, :forecast_time] = df[group_1, :forecast_time] - Hour(6)
+    #     df[group_2, :forecast_time] = df[group_2, :forecast_time] - Hour(5)
+    #     df[group_3, :forecast_time] = df[group_3, :forecast_time] - Hour(6)
+    #     df[group_4, :forecast_time] = df[group_4, :forecast_time] - Hour(5)
+    #     df[group_5, :forecast_time] = df[group_5, :forecast_time] - Hour(6)
+
+    #     # Issue
+    #     df[group_1y, :issue_time] = df[group_1y, :issue_time] - Hour(6)
+    #     df[group_2y, :issue_time] = df[group_2y, :issue_time] - Hour(5)
+    #     df[group_3y, :issue_time] = df[group_3y, :issue_time] - Hour(6)
+    #     df[group_4y, :issue_time] = df[group_4y, :issue_time] - Hour(5)
+    #     df[group_5y, :issue_time] = df[group_5y, :issue_time] - Hour(6)
+    # end
+    # return(df)
+
     if is_actual
-        x = copy(data[:, :time_index])
-        group_1 = x .<= DateTime(2018, 03, 11, 2) #from Jan. till Mar. 11
-        group_2 = DateTime(2018, 03, 11, 2) .< x .<= DateTime(2018, 03, 25, 1) #from Mar. 11 to Mar. 25
-        group_3 = DateTime(2018, 03, 25, 1) .< x .<= DateTime(2018, 10, 28, 2) #from Mar. 25 to Oct. 28
-        group_4 = DateTime(2018, 10, 28, 2) .< x .<= DateTime(2018, 11, 04, 2) #from Oct. 28 to Nov. 04
-        group_5 = x .>= DateTime(2018, 11, 04, 2) #from Nov. 04 ahead
+        x = copy(data);
+        x[:,:time_index] = x[:,:time_index] .- Dates.Hour(6);
+        return x;
     else
-        x = copy(data[:, :forecast_time])
-        group_1 = x .<= DateTime(2018, 03, 11, 2) #from Jan. till Mar. 11
-        group_2 = DateTime(2018, 03, 11, 2) .< x .<= DateTime(2018, 03, 25, 1) #from Mar. 11 to Mar. 25
-        group_3 = DateTime(2018, 03, 25, 1) .< x .<= DateTime(2018, 10, 28, 2) #from Mar. 25 to Oct. 28
-        group_4 = DateTime(2018, 10, 28, 2) .< x .<= DateTime(2018, 11, 04, 2) #from Oct. 28 to Nov. 04
-        group_5 = x .>= DateTime(2018, 11, 04, 2) #from Nov. 04 ahead
-
-        y = copy(data[:, :issue_time])
-        group_1y = y .<= DateTime(2018, 03, 11, 2) #from Jan. till Mar. 11
-        group_2y = DateTime(2018, 03, 11, 2) .< y .<= DateTime(2018, 03, 25, 1) #from Mar. 11 to Mar. 25
-        group_3y = DateTime(2018, 03, 25, 1) .< y .<= DateTime(2018, 10, 28, 2) #from Mar. 25 to Oct. 28
-        group_4y = DateTime(2018, 10, 28, 2) .< y .<= DateTime(2018, 11, 04, 2) #from Oct. 28 to Nov. 04
-        group_5y = y .>= DateTime(2018, 11, 04, 2) #from Nov. 04 ahead
+        df = copy(data);
+        df[:,:forecast_time] = df[:,:forecast_time] .- Dates.Hour(6);
+        df[:,:issue_time] = df[:,:issue_time] .- Dates.Hour(6);
+        return df;
     end
-
-    # Groups are set up. Carry out transformations
-    if is_actual
-        data[group_1, :time_index] = data[group_1, :time_index] - Hour(6)
-        data[group_2, :time_index] = data[group_2, :time_index] - Hour(5)
-        data[group_3, :time_index] = data[group_3, :time_index] - Hour(6)
-        data[group_4, :time_index] = data[group_4, :time_index] - Hour(5)
-        data[group_5, :time_index] = data[group_5, :time_index] - Hour(6)
-    else
-        # Forecast
-        data[group_1, :forecast_time] = data[group_1, :forecast_time] - Hour(6)
-        data[group_2, :forecast_time] = data[group_2, :forecast_time] - Hour(5)
-        data[group_3, :forecast_time] = data[group_3, :forecast_time] - Hour(6)
-        data[group_4, :forecast_time] = data[group_4, :forecast_time] - Hour(5)
-        data[group_5, :forecast_time] = data[group_5, :forecast_time] - Hour(6)
-
-        # Issue
-        data[group_1y, :issue_time] = data[group_1y, :issue_time] - Hour(6)
-        data[group_2y, :issue_time] = data[group_2y, :issue_time] - Hour(5)
-        data[group_3y, :issue_time] = data[group_3y, :issue_time] - Hour(6)
-        data[group_4y, :issue_time] = data[group_4y, :issue_time] - Hour(5)
-        data[group_5y, :issue_time] = data[group_5y, :issue_time] - Hour(6)
-    end
-    return(data)
 end

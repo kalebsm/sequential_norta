@@ -30,9 +30,9 @@ function getplots(data, title, type)
     @rput stdev_nonzero
     R"""
     library(ggplot2)
-#    library(extrafont)
-#    font_import(pattern = "lmroman*") 
-#    loadfonts()
+    library(extrafont)
+    font_import(pattern = "lmroman*") 
+    loadfonts()
 
     y = stdev_nonzero
     y_len = length(y)
@@ -49,10 +49,10 @@ function getplots(data, title, type)
     geom_point(color = "deepskyblue3") + 
     labs(x = "Data points", 
          y = "Standard deviation [MW]",
-         title = "aaaaa",
-         subtitle = "aaaa")+
-    theme_bw()  
-    #theme(text = element_text(family = "LM Roman 10"))
+         title = $title,
+         subtitle = subtitle)+
+    theme_bw() + 
+    theme(text = element_text(family = "LM Roman 10"))
     """
 
     # # Scatterplot

@@ -1,5 +1,6 @@
-name = "norta_scenarios"
-authors = ["Hugo Santarem de Araujo"]
+name = "SequentialNorta"
+uuid = "01d7be47-93ac-465b-87d2-9e4488bfa3ca"
+authors = ["Kaleb Smith", "Hugo Santarem de Araujo"]
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"

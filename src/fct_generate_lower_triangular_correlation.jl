@@ -1,4 +1,4 @@
-function generate_lower_triangular_correlation(data, issue_idcs, is_solar) #,
+function generate_lower_triangular_correlation(data, issue_idcs, dec_mdl_lkd_len, is_solar) #,
     #scenario_hour,
     #scenario_day,
     #scenario_month,
@@ -55,16 +55,16 @@ function generate_lower_triangular_correlation(data, issue_idcs, is_solar) #,
             solar_zero_indices = vcat(solar_zero_indices, allequal_ind_1d .+ (i-1)*24)
         end
         # checks of lengths - both are TRUE
-        # println(decision_model_length == 363*24+24)
+        # println(dec_mdl_lkd_len == 363*24+24)
         # println(363*48 == size(corr_forecast_issue_times,1))
 
-        solar_vector = ones(decision_model_length);
+        solar_vector = ones(dec_mdl_lkd_len);
         # for idx in solar_zero_indices
         #     solar_vector[idx] = 0
         # end
         solar_vector[solar_zero_indices] .= 0;
 
-        all_decision_hours = Set(collect(1:decision_model_length));
+        all_decision_hours = Set(collect(1:dec_mdl_lkd_len));
         sunny_decision_hours = sort(collect(setdiff(all_decision_hours, solar_zero_indices)));
 
         return M, sunny_decision_hours

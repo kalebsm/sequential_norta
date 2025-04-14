@@ -1,6 +1,7 @@
 function generate_norta_scenarios(number_of_scen, scenario_len, date, start_ind, 
                                     active_iss, corr_forc_iss_times, d_norm, 
-                                    M, current_marginals, landing_probabilities, is_solar=false)
+                                    M, current_marginals, landing_probabilities,
+                                    sunny_decision_hours, is_solar=false)
     """
     generate_norta_scenarios: 
 

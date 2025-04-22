@@ -1,7 +1,7 @@
 function generate_norta_scenarios(number_of_scen, scenario_len, date, start_ind, 
                                     active_iss, corr_forc_iss_times, d_norm, 
                                     M, current_marginals, landing_probabilities,
-                                    sunny_decision_hours, is_solar=false)
+                                    solar_well_defined_cols, is_solar=false)
     """
     generate_norta_scenarios: 
 
@@ -37,8 +37,8 @@ function generate_norta_scenarios(number_of_scen, scenario_len, date, start_ind,
     forecast_decision_time_hours = collect(first_forec_decision_time_hour:first_forec_decision_time_hour+scenario_len-1)
 
     if is_solar
-        decision_time_sunny_hours = intersect(sunny_decision_hours, forecast_decision_time_hours);
-        policy_time_sunny_hours = decision_time_sunny_hours .- first_forec_decision_time_hour .+ 1;
+        # decision_time_sunny_hours = intersect(sunny_decision_hours, forecast_decision_time_hours);
+        policy_time_sunny_hours = solar_well_defined_cols
     
         # find the actuals sunny hours before and at the policy start
         kernel_actuals_policy_time_hours = policy_time_sunny_hours[policy_time_sunny_hours .<= policy_actuals_len];
@@ -70,11 +70,18 @@ function generate_norta_scenarios(number_of_scen, scenario_len, date, start_ind,
         min_actual = Array{Float64}(undef, kernel_scenario_len)
         # loop through number of scenarios to get W realizations from actuals
         for k in 1:kernel_scenario_len
-            current_marginals_dist = current_marginals[k, percentile_column_index]
+
+            if is_solar
+                issue_solar_index = solar_well_defined_cols[k]
+            else
+                issue_solar_index = k
+            end
+
+            current_marginals_dist = current_marginals[issue_solar_index, percentile_column_index]
             vec_current_marginals_dist = collect(current_marginals_dist)
             ecdf_actuals = ecdf(vec_current_marginals_dist)
     
-            actual_lp_via_md = ecdf_actuals(current_marginals[k,:avg_actual])
+            actual_lp_via_md = ecdf_actuals(current_marginals[issue_solar_index,:avg_actual])
             if actual_lp_via_md  == 1
                 actual_lp_via_md  = 0.99
             elseif actual_lp_via_md  == 0
@@ -123,8 +130,13 @@ function generate_norta_scenarios(number_of_scen, scenario_len, date, start_ind,
             current_marginals_dist = current_marginals[k, percentile_column_index];
             current_actual = current_marginals[k, :avg_actual];
             
-            # calculate 
-            if k <= policy_actuals_kernel_len # replace policy_actuals_len with actual values
+            # replace with actual if in kernel indices values
+            # or calculate the quantile of the distribution
+            if !is_solar
+                kernel_actuals_policy_time_hours = 1:scenario_len;
+            end
+
+            if k in kernel_actuals_policy_time_hours 
                 Y[nscen, k] = current_actual;
             else
                 Y[nscen, k] = quantile(current_marginals_dist, cdf_Z_48[k]);

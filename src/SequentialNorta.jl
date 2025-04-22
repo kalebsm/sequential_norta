@@ -45,6 +45,8 @@ include(joinpath(@__DIR__, "..", "src", "fct_write_percentiles.jl"));
 include(joinpath(@__DIR__, "..", "src", "fct_generate_lower_triangular_correlation.jl"));
 include(joinpath(@__DIR__, "..", "src", "fct_generate_norta_scenarios.jl"));
 include(joinpath(@__DIR__, "..", "src", "fct_scenario_generator_init.jl"));
+include(joinpath(@__DIR__, "..", "src", "fct_get_well_defined_covariance_matrix.jl"));
+
 
 export read_h5_file
 export fct_compute_hourly_average_actuals
@@ -55,5 +57,6 @@ export transform_landing_probability
 export generate_lower_triangular_correlation
 export generate_norta_scenarios
 export scenario_generator_init
+export get_well_defined_covariance_matrix
 
 end # module

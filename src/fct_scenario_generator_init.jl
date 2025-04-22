@@ -193,6 +193,10 @@ function scenario_generator_init()
     # for the actuals and DLAC calculations, determine capacity factors at correct model times
     forecast2model_indices = findall(in(unique_forecast_times), load_actual_avg[!, :time_index])
 
+    solar_model_data = solar_actual_avg[forecast2model_indices, :]
+    wind_model_data = wind_actual_avg[forecast2model_indices, :]
+    load_model_data = load_actual_avg[forecast2model_indices, :]
+
     max_solar_actual = maximum(solar_actual_avg[!, :avg_actual]);
     max_wind_actual = maximum(wind_actual_avg[!, :avg_actual]);
 
@@ -207,11 +211,32 @@ function scenario_generator_init()
     # CSV.write("actuals.csv", actuals_df)
 
     #=======================================================================
+    Determine the nonzero covariance structure
+    =======================================================================#
+    upd_lp_solar, solar_well_defined_cols = get_well_defined_covariance_matrix(lp_solar);
+    upd_lp_wind, wind_well_defined_cols = get_well_defined_covariance_matrix(lp_wind);
+    upd_lp_load, load_well_defined_cols = get_well_defined_covariance_matrix(lp_load);
+
+    # get the indices of when solar_model_data is greater than 0
+    solar_positive_indices = findall(row -> row[:avg_actual] > 0, eachrow(solar_model_data))
+
+    # Initialize the matrix with 363 rows and the same number of columns as solar_well_defined_cols
+    solar_issue_decn_time_matrix = Matrix{Int}(undef, 363, length(solar_well_defined_cols))
+
+    # Set the first row to be the same as solar_well_defined_cols
+    solar_issue_decn_time_matrix[1, :] = solar_well_defined_cols
+
+    # Fill the remaining rows by adding 23 to each column of the previous row
+    for i in 2:363
+        solar_issue_decn_time_matrix[i, :] = solar_issue_decn_time_matrix[i - 1, :] .+ 23
+    end
+
+    #=======================================================================
     Perform Cholesky Decomposition to get Lower Triangular Correlation Matrix
     =======================================================================#
-    M_load = generate_lower_triangular_correlation(lp_load, issue_idcs, decision_mdl_lkd_length, false);
-    M_solar, sunny_decision_hours = generate_lower_triangular_correlation(lp_solar, issue_idcs, decision_mdl_lkd_length, true);
-    M_wind = generate_lower_triangular_correlation(lp_wind, issue_idcs, decision_mdl_lkd_length, false);
+    M_load = generate_lower_triangular_correlation(upd_lp_load);
+    M_solar = generate_lower_triangular_correlation(upd_lp_solar);
+    M_wind = generate_lower_triangular_correlation(upd_lp_wind);
 
 
     #=======================================================================
@@ -222,64 +247,74 @@ function scenario_generator_init()
 
 
 
-
-
     #=======================================================================
     INITIALIZE THE DICTIONARY TO SAVE ALL GENERATOR INFORMATION
     everthing used in the rolling horizon loop must be initialized
     in the dictionary
     =======================================================================#
     # create a dictionary to hold all the generator information
-    scen_generator_info = Dict()
-    scen_generator_info["unique_forecast_times"] = unique_forecast_times
-    scen_generator_info["unique_issue_times"] = unique_issue_times
-    scen_generator_info["start_date"] = start_date
-    scen_generator_info["corr_forecast_issue_times"] = corr_forecast_issue_times
-    scen_generator_info["forecast_scenario_length"] = forecast_scenario_length
-    scen_generator_info["number_of_scenarios"] = number_of_scenarios
-    scen_generator_info["M_load"] = M_load
-    scen_generator_info["M_solar"] = M_solar
-    scen_generator_info["M_wind"] = M_wind
-    scen_generator_info["load_marginals_by_issue"] = load_marginals_by_issue
-    scen_generator_info["solar_marginals_by_issue"] = solar_marginals_by_issue
-    scen_generator_info["wind_marginals_by_issue"] = wind_marginals_by_issue
-    scen_generator_info["load_landing_probabilities"] = load_landing_probabilities
-    scen_generator_info["solar_landing_probabilities"] = solar_landing_probabilities
-    scen_generator_info["wind_landing_probabilities"] = wind_landing_probabilities
-    scen_generator_info["sunny_decision_hours"] = sunny_decision_hours
-    scen_generator_info["load_actual_avg"] = load_actual_avg
-    scen_generator_info["solar_actual_avg"] = solar_actual_avg
-    scen_generator_info["wind_actual_avg"] = wind_actual_avg
-    scen_generator_info["load_actual_avg_GW"] = load_actual_avg_GW
-    scen_generator_info["solar_actual_avg_cf"] = solar_actual_avg_cf
-    scen_generator_info["wind_actual_avg_cf"] = wind_actual_avg_cf
-    scen_generator_info["decision_mdl_lkd_length"] = decision_mdl_lkd_length
+    scen_generator = Dict()
+    scen_generator["unique_forecast_times"] = unique_forecast_times
+    scen_generator["unique_issue_times"] = unique_issue_times
+    scen_generator["start_date"] = start_date
+    scen_generator["corr_forecast_issue_times"] = corr_forecast_issue_times
+    scen_generator["forecast_scenario_length"] = forecast_scenario_length
+    scen_generator["number_of_scenarios"] = number_of_scenarios
+    scen_generator["issue_idcs"] = issue_idcs
+    scen_generator["solar_model_data"] = solar_model_data
+    scen_generator["lp_load"] = lp_load
+    scen_generator["lp_solar"] = lp_solar
+    scen_generator["lp_wind"] = lp_wind
+    scen_generator["M_load"] = M_load
+    scen_generator["M_solar"] = M_solar
+    scen_generator["M_wind"] = M_wind
+    scen_generator["load_marginals_by_issue"] = load_marginals_by_issue
+    scen_generator["solar_marginals_by_issue"] = solar_marginals_by_issue
+    scen_generator["wind_marginals_by_issue"] = wind_marginals_by_issue
+    scen_generator["load_landing_probabilities"] = load_landing_probabilities
+    scen_generator["solar_landing_probabilities"] = solar_landing_probabilities
+    scen_generator["wind_landing_probabilities"] = wind_landing_probabilities
+    scen_generator["solar_well_defined_cols"] = solar_well_defined_cols
+    scen_generator["solar_issue_decn_time_matrix"] = solar_issue_decn_time_matrix
+    scen_generator["load_actual_avg"] = load_actual_avg
+    scen_generator["solar_actual_avg"] = solar_actual_avg
+    scen_generator["wind_actual_avg"] = wind_actual_avg
+    scen_generator["load_actual_avg_GW"] = load_actual_avg_GW
+    scen_generator["solar_actual_avg_cf"] = solar_actual_avg_cf
+    scen_generator["wind_actual_avg_cf"] = wind_actual_avg_cf
+    scen_generator["decision_mdl_lkd_length"] = decision_mdl_lkd_length
+    scen_generator["max_solar_actual"] = max_solar_actual
+    scen_generator["max_wind_actual"] = max_wind_actual
     
-    return scen_generator_info
+    return scen_generator
 end
 
 
-# # now write the scen_generator_info but switch it so that you are saving the objects = scen_generator_info[etc]
-# # Save the objects from scen_generator_info into individual variables
-# unique_forecast_times = scen_generator_info["unique_forecast_times"]
-# unique_issue_times = scen_generator_info["unique_issue_times"]
-# start_date = scen_generator_info["start_date"]
-# corr_forecast_tissue_times = scen_generator_info["corr_forecast_tissue_times"]
-# forecast_scenario_length = scen_generator_info["forecast_scenario_length"]
-# number_of_scenarios = scen_generator_info["number_of_scenarios"]
-# M_load = scen_generator_info["M_load"]
-# M_solar = scen_generator_info["M_solar"]
-# M_wind = scen_generator_info["M_wind"]
-# load_marginals_by_issue = scen_generator_info["load_marginals_by_issue"]
-# solar_marginals_by_issue = scen_generator_info["solar_marginals_by_issue"]
-# wind_marginals_by_issue = scen_generator_info["wind_marginals_by_issue"]
-# load_landing_probabilities = scen_generator_info["load_landing_probabilities"]
-# solar_landing_probabilities = scen_generator_info["solar_landing_probabilities"]
-# wind_landing_probabilities = scen_generator_info["wind_landing_probabilities"]
-# sunny_decision_hours = scen_generator_info["sunny_decision_hours"]
-# load_actual_avg = scen_generator_info["load_actual_avg"]
-# solar_actual_avg = scen_generator_info["solar_actual_avg"]
-# wind_actual_avg = scen_generator_info["wind_actual_avg"]
-# load_actual_avg_GW = scen_generator_info["load_actual_avg_GW"]
-# solar_actual_avg_cf = scen_generator_info["solar_actual_avg_cf"]
-# wind_actual_avg_cf = scen_generator_info["wind_actual_avg_cf"]
+# # now write the scen_generator but switch it so that you are saving the objects = scen_generator[etc]
+# # Save the objects from scen_generator into individual variables
+# unique_forecast_times = scen_generator["unique_forecast_times"]
+# unique_issue_times = scen_generator["unique_issue_times"]
+# start_date = scen_generator["start_date"]
+# corr_forecast_tissue_times = scen_generator["corr_forecast_tissue_times"]
+# forecast_scenario_length = scen_generator["forecast_scenario_length"]
+# number_of_scenarios = scen_generator["number_of_scenarios"]
+# issue_idcs = scen_generator["issue_idcs"]
+# lp_load = scen_generator["lp_load"]
+# lp_solar = scen_generator["lp_solar"]
+# lp_wind = scen_generator["lp_wind"]
+# M_load = scen_generator["M_load"]
+# M_solar = scen_generator["M_solar"]
+# M_wind = scen_generator["M_wind"]
+# load_marginals_by_issue = scen_generator["load_marginals_by_issue"]
+# solar_marginals_by_issue = scen_generator["solar_marginals_by_issue"]
+# wind_marginals_by_issue = scen_generator["wind_marginals_by_issue"]
+# load_landing_probabilities = scen_generator["load_landing_probabilities"]
+# solar_landing_probabilities = scen_generator["solar_landing_probabilities"]
+# wind_landing_probabilities = scen_generator["wind_landing_probabilities"]
+# sunny_decision_hours = scen_generator["sunny_decision_hours"]
+# load_actual_avg = scen_generator["load_actual_avg"]
+# solar_actual_avg = scen_generator["solar_actual_avg"]
+# wind_actual_avg = scen_generator["wind_actual_avg"]
+# load_actual_avg_GW = scen_generator["load_actual_avg_GW"]
+# solar_actual_avg_cf = scen_generator["solar_actual_avg_cf"]
+# wind_actual_avg_cf = scen_generator["wind_actual_avg_cf"]

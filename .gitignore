@@ -414,3 +414,9 @@ $RECYCLE.BIN/
 
 ## Acknowledgements
 # Many thanks to `https://gitignore.io/`, written and maintained by Joe Blau, which contributed much material to this gitignore file.
+test/generate_norta_scenarios_test.ipynb
+test/scenarios_check.ipynb
+test/solar_scenarios_check.ipynb
+test/test_sunny_decision_hours.ipynb
+test/upd_generate_norta_scenarios_test.ipynb
+test/solar_scenarios_check.ipynb

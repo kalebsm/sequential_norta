@@ -7,14 +7,14 @@ function scenario_generator_init()
     scenario_day = 1;
     scenario_month = 1;
     scenario_year = 2018;
-    historical_load = "ercot_BA_load_actuals_2018.h5"
-    forecast_load = "ercot_BA_load_forecast_day_ahead_2018.h5"
-    historical_solar = "ercot_BA_solar_actuals_Existing_2018.h5"
-    forecast_da_solar = "ercot_BA_solar_forecast_day_ahead_existing_2018.h5"
-    forecast_2da_solar = "ercot_BA_solar_forecast_2_day_ahead_existing_2018.h5"
-    historical_wind = "ercot_BA_wind_actuals_Existing_2018.h5"
-    forecastd_da_wind = "ercot_BA_wind_forecast_day_ahead_existing_2018.h5"
-    forecast_2da_wind = "ercot_BA_wind_forecast_day_ahead_existing_2018.h5"
+    historical_load = "BA_load_actuals_2018.h5"
+    forecast_load = "BA_load_forecast_day_ahead_2018.h5"
+    historical_solar = "BA_solar_actuals_Existing_2018.h5"
+    forecast_da_solar = "BA_solar_forecast_day_ahead_existing_2018.h5"
+    forecast_2da_solar = "BA_solar_forecast_2_day_ahead_existing_2018.h5"
+    historical_wind = "BA_wind_actuals_Existing_2018.h5"
+    forecast_da_wind = "BA_wind_forecast_day_ahead_existing_2018.h5"
+    forecast_2da_wind = "BA_wind_forecast_2_day_ahead_existing_2018.h5"
     write_percentile =  1
     ModelScalingFactor = 1000
 
@@ -30,17 +30,17 @@ function scenario_generator_init()
 
     # Load data
     load_actuals_raw = read_h5_file(joinpath(scenario_data_path, historical_load), "load");
-    load_forecast_raw = read_h5_file(joinpath(scenario_data_path, "ercot_BA_load_forecast_day_ahead_2018.h5"), "load", false);
+    load_forecast_raw = read_h5_file(joinpath(scenario_data_path, "BA_load_forecast_day_ahead_2018.h5"), "load", false);
 
     # Solar data
-    solar_actuals_raw = read_h5_file(joinpath(scenario_data_path, "ercot_BA_solar_actuals_Existing_2018.h5"), "solar");
-    solar_forecast_dayahead_raw = read_h5_file(joinpath(scenario_data_path, "ercot_BA_solar_forecast_day_ahead_existing_2018.h5"), "solar", false);
-    solar_forecast_2dayahead_raw = read_h5_file(joinpath(scenario_data_path, "ercot_BA_solar_forecast_2_day_ahead_existing_2018.h5"), "solar", false);
+    solar_actuals_raw = read_h5_file(joinpath(scenario_data_path, "BA_solar_actuals_Existing_2018.h5"), "solar");
+    solar_forecast_dayahead_raw = read_h5_file(joinpath(scenario_data_path, "BA_solar_forecast_day_ahead_existing_2018.h5"), "solar", false);
+    solar_forecast_2dayahead_raw = read_h5_file(joinpath(scenario_data_path, "BA_solar_forecast_2_day_ahead_existing_2018.h5"), "solar", false);
 
     # Wind data
-    wind_actuals_raw = read_h5_file(joinpath(scenario_data_path, "ercot_BA_wind_actuals_Existing_2018.h5"), "wind");
-    wind_forecast_dayahead_raw = read_h5_file(joinpath(scenario_data_path, "ercot_BA_wind_forecast_day_ahead_existing_2018.h5"), "wind", false);
-    wind_forecast_2dayahead_raw = read_h5_file(joinpath(scenario_data_path, "ercot_BA_wind_forecast_2_day_ahead_existing_2018.h5"), "wind", false);
+    wind_actuals_raw = read_h5_file(joinpath(scenario_data_path, "BA_wind_actuals_Existing_2018.h5"), "wind");
+    wind_forecast_dayahead_raw = read_h5_file(joinpath(scenario_data_path, "BA_wind_forecast_day_ahead_existing_2018.h5"), "wind", false);
+    wind_forecast_2dayahead_raw = read_h5_file(joinpath(scenario_data_path, "BA_wind_forecast_2_day_ahead_existing_2018.h5"), "wind", false);
 
     #=======================================================================
     Compute the hourly average for the actuals data
